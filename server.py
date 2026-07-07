@@ -50,10 +50,29 @@ class SecureHandler(http.server.SimpleHTTPRequestHandler):
 
         super().do_GET() if self.command == "GET" else super().do_HEAD()
 
+    def send_response(self, code, message=None):
+        self._response_code = code
+        super().send_response(code, message)
+
     def end_headers(self):
-        self.send_header("Cache-Control", "no-cache, no-store, must-revalidate")
-        self.send_header("Pragma", "no-cache")
-        self.send_header("Expires", "0")
+        # Serve static assets (images, fonts, JS, CSS) with a long cache so the
+        # page renders instantly from the browser cache on every load after the first.
+        # Only apply long-lived caching to successful (2xx) responses so that
+        # 404/403 errors are never cached and hard to recover from.
+        static_exts = (
+            ".png", ".jpg", ".jpeg", ".gif", ".webp", ".svg", ".ico",
+            ".woff", ".woff2", ".ttf", ".otf",
+            ".js", ".css",
+        )
+        path = self.path.split("?")[0].lower()
+        status = getattr(self, "_response_code", None)
+        is_success = status is not None and 200 <= status < 300
+        if is_success and any(path.endswith(ext) for ext in static_exts):
+            self.send_header("Cache-Control", "public, max-age=31536000, immutable")
+        else:
+            self.send_header("Cache-Control", "no-cache, no-store, must-revalidate")
+            self.send_header("Pragma", "no-cache")
+            self.send_header("Expires", "0")
         super().end_headers()
 
     def log_message(self, format, *args):
