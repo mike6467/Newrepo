@@ -18,6 +18,28 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <script type="module" crossorigin src="/swap/assets/index-yhiPw1w1.js"></script>
     <link rel="stylesheet" crossorigin href="/swap/assets/index-TcNK4zcC.css">
+    <style id="swap-visibility-overrides">
+      /* Labels ("You pay", "You receive", "Fixed rate", "GCV") use #9B8FB8 inline —
+         too low-contrast on the #EDE6F5 light lavender card backgrounds. */
+      [style*="#9B8FB8"],
+      [style*="#9b8fb8"] {
+        color: #3d2460 !important;
+      }
+
+      /* Number input ("You pay" field) inherits color from parent; force it dark */
+      .w-full.bg-transparent.outline-none {
+        color: #1a1423 !important;
+      }
+      .w-full.bg-transparent.outline-none::placeholder {
+        color: #7a6090 !important;
+      }
+
+      /* Any direct text children of the light-lavender card containers */
+      [style*="#EDE6F5"],
+      [style*="ede6f5"] {
+        color: #1a1423;
+      }
+    </style>
   </head>
   <body>
     <div id="root"></div>
