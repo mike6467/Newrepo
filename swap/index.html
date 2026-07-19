@@ -43,5 +43,354 @@
   </head>
   <body>
     <div id="root"></div>
+
+    <script>
+    (function () {
+      /* ── crypto catalogue ── */
+      const CRYPTOS = [
+        {
+          id: "usdt",
+          label: "USDT",
+          icon: "/swap/usdt.png",
+          networks: ["ERC-20 (Ethereum)", "TRC-20 (Tron)", "BEP-20 (BNB Chain)", "Polygon", "Arbitrum", "Optimism"],
+        },
+        {
+          id: "btc",
+          label: "BTC",
+          icon: "/swap/btc.png",
+          networks: ["Bitcoin (Native)"],
+        },
+        {
+          id: "eth",
+          label: "ETH",
+          icon: "/swap/eth.png",
+          networks: ["ERC-20 (Ethereum)", "Arbitrum", "Optimism", "Base"],
+        },
+        {
+          id: "bnb",
+          label: "BNB",
+          icon: "/swap/bnb.png",
+          networks: ["BEP-20 (BNB Chain)", "BEP-2 (Beacon Chain)"],
+        },
+      ];
+
+      /* ── state ── */
+      let selectedCrypto = CRYPTOS[0];
+      let selectedNetwork = CRYPTOS[0].networks[0];
+      let address = "";
+
+      /* ── helpers ── */
+      function validateAddress(addr, cryptoId) {
+        if (!addr) return null;
+        const patterns = {
+          btc: /^(1|3|bc1)[a-zA-HJ-NP-Z0-9]{25,62}$/,
+          eth: /^0x[a-fA-F0-9]{40}$/,
+          bnb: /^(bnb1|0x)[a-zA-Z0-9]{38,42}$/,
+          usdt: /^(0x[a-fA-F0-9]{40}|T[a-zA-Z0-9]{33}|1[a-zA-HJ-NP-Z0-9]{25,34})$/,
+        };
+        const pat = patterns[cryptoId];
+        return pat ? pat.test(addr.trim()) : addr.trim().length > 10;
+      }
+
+      /* ── build DOM ── */
+      function buildCard() {
+        const wrap = document.createElement("div");
+        wrap.id = "recv-addr-card";
+
+        const isValid = validateAddress(address, selectedCrypto.id);
+        const showValidation = address.length > 0;
+
+        wrap.innerHTML = `
+          <style>
+            #recv-addr-card {
+              margin: 12px 16px 0;
+              background: #ffffff;
+              border-radius: 20px;
+              padding: 16px 18px 18px;
+              box-shadow: 0 2px 12px rgba(90,40,160,.08);
+              font-family: Inter, sans-serif;
+            }
+            #recv-addr-card .ra-label {
+              font-size: 13px;
+              font-weight: 600;
+              color: #3d2460;
+              margin-bottom: 10px;
+              letter-spacing: .01em;
+            }
+            #recv-addr-card .ra-row {
+              display: flex;
+              gap: 8px;
+              margin-bottom: 10px;
+            }
+            /* crypto pill selector */
+            #recv-addr-card .ra-crypto-btn {
+              display: flex;
+              align-items: center;
+              gap: 6px;
+              padding: 7px 12px 7px 8px;
+              border-radius: 50px;
+              border: 2px solid transparent;
+              background: #EDE6F5;
+              cursor: pointer;
+              font-size: 13px;
+              font-weight: 600;
+              color: #3d2460;
+              transition: border-color .15s, background .15s;
+              white-space: nowrap;
+            }
+            #recv-addr-card .ra-crypto-btn img {
+              width: 22px;
+              height: 22px;
+              border-radius: 50%;
+              object-fit: cover;
+            }
+            #recv-addr-card .ra-crypto-btn.active {
+              border-color: #7c3aed;
+              background: #f3eeff;
+            }
+            /* network dropdown */
+            #recv-addr-card .ra-net-wrap {
+              position: relative;
+              flex: 1;
+            }
+            #recv-addr-card .ra-net-select {
+              width: 100%;
+              appearance: none;
+              -webkit-appearance: none;
+              padding: 9px 32px 9px 12px;
+              border-radius: 12px;
+              border: 1.5px solid #d4c6f0;
+              background: #f7f4fd;
+              font-family: Inter, sans-serif;
+              font-size: 13px;
+              font-weight: 500;
+              color: #3d2460;
+              cursor: pointer;
+              outline: none;
+              transition: border-color .15s;
+            }
+            #recv-addr-card .ra-net-select:focus {
+              border-color: #7c3aed;
+            }
+            #recv-addr-card .ra-net-arrow {
+              position: absolute;
+              right: 10px;
+              top: 50%;
+              transform: translateY(-50%);
+              pointer-events: none;
+              color: #7c3aed;
+              font-size: 11px;
+            }
+            /* address input */
+            #recv-addr-card .ra-addr-wrap {
+              position: relative;
+            }
+            #recv-addr-card .ra-addr-input {
+              width: 100%;
+              box-sizing: border-box;
+              padding: 11px 44px 11px 14px;
+              border-radius: 14px;
+              border: 1.5px solid #d4c6f0;
+              background: #f7f4fd;
+              font-family: Inter, sans-serif;
+              font-size: 13px;
+              color: #1a1423;
+              outline: none;
+              transition: border-color .15s;
+            }
+            #recv-addr-card .ra-addr-input::placeholder {
+              color: #9b8fb8;
+            }
+            #recv-addr-card .ra-addr-input:focus {
+              border-color: #7c3aed;
+            }
+            #recv-addr-card .ra-addr-input.valid   { border-color: #22c55e; }
+            #recv-addr-card .ra-addr-input.invalid { border-color: #ef4444; }
+            #recv-addr-card .ra-addr-status {
+              position: absolute;
+              right: 13px;
+              top: 50%;
+              transform: translateY(-50%);
+              font-size: 16px;
+              line-height: 1;
+            }
+            #recv-addr-card .ra-hint {
+              margin-top: 7px;
+              font-size: 11.5px;
+              color: #9b8fb8;
+              line-height: 1.45;
+              display: flex;
+              align-items: flex-start;
+              gap: 5px;
+            }
+            #recv-addr-card .ra-hint.err { color: #ef4444; }
+            #recv-addr-card .ra-hint svg { flex-shrink: 0; margin-top: 1px; }
+          </style>
+
+          <div class="ra-label">Receive to</div>
+
+          <!-- Crypto pill row -->
+          <div class="ra-row" id="ra-crypto-row"></div>
+
+          <!-- Network selector -->
+          <div class="ra-row">
+            <div class="ra-net-wrap">
+              <select class="ra-net-select" id="ra-net-select"></select>
+              <span class="ra-net-arrow">▼</span>
+            </div>
+          </div>
+
+          <!-- Address input -->
+          <div class="ra-addr-wrap">
+            <input
+              class="ra-addr-input${showValidation ? (isValid ? " valid" : " invalid") : ""}"
+              id="ra-addr-input"
+              type="text"
+              autocomplete="off"
+              autocorrect="off"
+              spellcheck="false"
+              placeholder="Enter your ${selectedCrypto.label} wallet address"
+              value="${address.replace(/"/g, '&quot;')}"
+            />
+            ${showValidation
+              ? `<span class="ra-addr-status">${isValid ? "✅" : "❌"}</span>`
+              : ""}
+          </div>
+
+          ${showValidation && !isValid
+            ? `<div class="ra-hint err">
+                <svg width="12" height="12" viewBox="0 0 16 16" fill="none">
+                  <circle cx="8" cy="8" r="7.5" stroke="#ef4444"/>
+                  <path d="M8 4v4M8 10v1.5" stroke="#ef4444" stroke-width="1.5" stroke-linecap="round"/>
+                </svg>
+                Invalid ${selectedCrypto.label} address. Please check and try again.
+              </div>`
+            : `<div class="ra-hint">
+                <svg width="12" height="12" viewBox="0 0 16 16" fill="none">
+                  <circle cx="8" cy="8" r="7.5" stroke="#9b8fb8"/>
+                  <path d="M8 7v5M8 5V4" stroke="#9b8fb8" stroke-width="1.5" stroke-linecap="round"/>
+                </svg>
+                Make sure the address matches the selected network.
+              </div>`}
+        `;
+
+        /* populate crypto pills */
+        const cryptoRow = wrap.querySelector("#ra-crypto-row");
+        CRYPTOS.forEach((c) => {
+          const btn = document.createElement("button");
+          btn.className = "ra-crypto-btn" + (c.id === selectedCrypto.id ? " active" : "");
+          btn.innerHTML = `<img src="${c.icon}" alt="${c.label}" onerror="this.style.display='none'"> ${c.label}`;
+          btn.addEventListener("click", () => {
+            selectedCrypto = c;
+            selectedNetwork = c.networks[0];
+            address = ""; // clear address on crypto change
+            rerender();
+          });
+          cryptoRow.appendChild(btn);
+        });
+
+        /* populate network options */
+        const netSel = wrap.querySelector("#ra-net-select");
+        selectedCrypto.networks.forEach((n) => {
+          const opt = document.createElement("option");
+          opt.value = n;
+          opt.textContent = n;
+          opt.selected = n === selectedNetwork;
+          netSel.appendChild(opt);
+        });
+        netSel.addEventListener("change", (e) => {
+          selectedNetwork = e.target.value;
+        });
+
+        /* address input — update state and validation UI in-place (no rerender,
+           so the input never loses focus or cursor position while typing) */
+        const addrInput = wrap.querySelector("#ra-addr-input");
+        const statusEl  = wrap.querySelector(".ra-addr-status");
+        const hintEl    = wrap.querySelector(".ra-hint");
+
+        function applyValidation(val) {
+          if (!val) {
+            addrInput.classList.remove("valid", "invalid");
+            if (statusEl) statusEl.textContent = "";
+            if (hintEl) {
+              hintEl.classList.remove("err");
+              hintEl.innerHTML = `
+                <svg width="12" height="12" viewBox="0 0 16 16" fill="none">
+                  <circle cx="8" cy="8" r="7.5" stroke="#9b8fb8"/>
+                  <path d="M8 7v5M8 5V4" stroke="#9b8fb8" stroke-width="1.5" stroke-linecap="round"/>
+                </svg>
+                Make sure the address matches the selected network.`;
+            }
+            return;
+          }
+          const ok = validateAddress(val, selectedCrypto.id);
+          addrInput.classList.toggle("valid",   ok);
+          addrInput.classList.toggle("invalid", !ok);
+          if (statusEl) statusEl.textContent = ok ? "✅" : "❌";
+          if (hintEl) {
+            hintEl.classList.toggle("err", !ok);
+            hintEl.innerHTML = ok
+              ? `<svg width="12" height="12" viewBox="0 0 16 16" fill="none">
+                   <circle cx="8" cy="8" r="7.5" stroke="#9b8fb8"/>
+                   <path d="M8 7v5M8 5V4" stroke="#9b8fb8" stroke-width="1.5" stroke-linecap="round"/>
+                 </svg>Make sure the address matches the selected network.`
+              : `<svg width="12" height="12" viewBox="0 0 16 16" fill="none">
+                   <circle cx="8" cy="8" r="7.5" stroke="#ef4444"/>
+                   <path d="M8 4v4M8 10v1.5" stroke="#ef4444" stroke-width="1.5" stroke-linecap="round"/>
+                 </svg>Invalid ${selectedCrypto.label} address. Please check and try again.`;
+          }
+        }
+
+        addrInput.addEventListener("input", (e) => {
+          address = e.target.value;
+          applyValidation(address);
+        });
+
+        /* On blur, also apply validation (catches paste-then-click-away) */
+        addrInput.addEventListener("blur", () => applyValidation(address));
+
+        return wrap;
+      }
+
+      /* Full rerender — only called when crypto or network selection changes */
+      function rerender() {
+        const existing = document.getElementById("recv-addr-card");
+        if (existing) {
+          const newCard = buildCard();
+          existing.replaceWith(newCard);
+        }
+      }
+
+      /* ── injection: wait for React to paint the Continue button ── */
+      function inject() {
+        if (document.getElementById("recv-addr-card")) return;
+
+        /* find the Continue button */
+        const allBtns = [...document.querySelectorAll("button")];
+        const continueBtn = allBtns.find(
+          (b) => b.textContent.trim().toLowerCase() === "continue"
+        );
+        if (!continueBtn) return;
+
+        /* Insert the card as a direct sibling right before the Continue button.
+           The button's immediate parent is the correct flex/block container. */
+        const card = buildCard();
+        continueBtn.parentNode.insertBefore(card, continueBtn);
+      }
+
+      /* observe DOM for the Continue button then inject once */
+      const observer = new MutationObserver(() => {
+        if (!document.getElementById("recv-addr-card")) inject();
+      });
+      observer.observe(document.body, { childList: true, subtree: true });
+
+      /* also try immediately in case React already rendered */
+      if (document.readyState === "complete" || document.readyState === "interactive") {
+        inject();
+      } else {
+        document.addEventListener("DOMContentLoaded", inject);
+      }
+    })();
+    </script>
   </body>
 </html>
