@@ -159,16 +159,16 @@
               border-color: #7c3aed;
               background: #f3eeff;
             }
-            /* network dropdown */
+            /* network dropdown trigger */
             #recv-addr-card .ra-net-wrap {
               position: relative;
               flex: 1;
             }
-            #recv-addr-card .ra-net-select {
-              width: 100%;
-              appearance: none;
-              -webkit-appearance: none;
-              padding: 9px 32px 9px 12px;
+            #recv-addr-card .ra-net-trigger {
+              display: flex;
+              align-items: center;
+              justify-content: space-between;
+              padding: 9px 12px;
               border-radius: 12px;
               border: 1.5px solid #d4c6f0;
               background: #f7f4fd;
@@ -177,20 +177,51 @@
               font-weight: 500;
               color: #3d2460;
               cursor: pointer;
-              outline: none;
+              user-select: none;
               transition: border-color .15s;
             }
-            #recv-addr-card .ra-net-select:focus {
+            #recv-addr-card .ra-net-trigger:hover,
+            #recv-addr-card .ra-net-trigger.open {
               border-color: #7c3aed;
             }
-            #recv-addr-card .ra-net-arrow {
-              position: absolute;
-              right: 10px;
-              top: 50%;
-              transform: translateY(-50%);
-              pointer-events: none;
+            #recv-addr-card .ra-net-trigger svg {
+              flex-shrink: 0;
+              margin-left: 8px;
+              transition: transform .2s;
+            }
+            #recv-addr-card .ra-net-trigger.open svg {
+              transform: rotate(180deg);
+            }
+            /* portal list — appended to body, never clipped */
+            #ra-net-portal {
+              position: fixed;
+              z-index: 999999;
+              background: #fff;
+              border: 1.5px solid #d4c6f0;
+              border-radius: 14px;
+              box-shadow: 0 8px 32px rgba(90,40,160,.18);
+              overflow-y: auto;
+              max-height: 240px;
+              font-family: Inter, sans-serif;
+              padding: 6px 0;
+              min-width: 200px;
+            }
+            #ra-net-portal .ra-net-opt {
+              padding: 10px 16px;
+              font-size: 13px;
+              font-weight: 500;
+              color: #3d2460;
+              cursor: pointer;
+              transition: background .1s;
+              white-space: nowrap;
+            }
+            #ra-net-portal .ra-net-opt:hover {
+              background: #f3eeff;
+            }
+            #ra-net-portal .ra-net-opt.selected {
+              background: #ede6f5;
+              font-weight: 700;
               color: #7c3aed;
-              font-size: 11px;
             }
             /* address input */
             #recv-addr-card .ra-addr-wrap {
@@ -243,11 +274,15 @@
           <!-- Crypto pill row -->
           <div class="ra-row" id="ra-crypto-row"></div>
 
-          <!-- Network selector -->
+          <!-- Network selector (custom portal dropdown) -->
           <div class="ra-row">
             <div class="ra-net-wrap">
-              <select class="ra-net-select" id="ra-net-select"></select>
-              <span class="ra-net-arrow">▼</span>
+              <div class="ra-net-trigger" id="ra-net-trigger">
+                <span id="ra-net-label">${selectedNetwork}</span>
+                <svg width="14" height="14" viewBox="0 0 16 16" fill="none">
+                  <path d="M4 6l4 4 4-4" stroke="#7c3aed" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+              </div>
             </div>
           </div>
 
@@ -300,17 +335,73 @@
           cryptoRow.appendChild(btn);
         });
 
-        /* populate network options */
-        const netSel = wrap.querySelector("#ra-net-select");
-        selectedCrypto.networks.forEach((n) => {
-          const opt = document.createElement("option");
-          opt.value = n;
-          opt.textContent = n;
-          opt.selected = n === selectedNetwork;
-          netSel.appendChild(opt);
-        });
-        netSel.addEventListener("change", (e) => {
-          selectedNetwork = e.target.value;
+        /* custom portal network dropdown */
+        const trigger = wrap.querySelector("#ra-net-trigger");
+
+        function closePortal() {
+          const old = document.getElementById("ra-net-portal");
+          if (old) old.remove();
+          trigger.classList.remove("open");
+          document.removeEventListener("click", outsideClick, true);
+        }
+
+        function outsideClick(e) {
+          const portal = document.getElementById("ra-net-portal");
+          if (!trigger.contains(e.target) && (!portal || !portal.contains(e.target))) {
+            closePortal();
+          }
+        }
+
+        function openPortal() {
+          closePortal(); // remove any stale portal first
+
+          const rect = trigger.getBoundingClientRect();
+          const portal = document.createElement("div");
+          portal.id = "ra-net-portal";
+
+          /* position below trigger, flip up if not enough space */
+          const spaceBelow = window.innerHeight - rect.bottom;
+          const estimatedHeight = Math.min(selectedCrypto.networks.length * 41 + 12, 240);
+          const openUpward = spaceBelow < estimatedHeight && rect.top > estimatedHeight;
+
+          portal.style.width  = rect.width + "px";
+          portal.style.left   = rect.left + "px";
+          if (openUpward) {
+            portal.style.bottom = (window.innerHeight - rect.top) + "px";
+            portal.style.top    = "auto";
+          } else {
+            portal.style.top  = (rect.bottom + 4) + "px";
+            portal.style.bottom = "auto";
+          }
+
+          selectedCrypto.networks.forEach((n) => {
+            const opt = document.createElement("div");
+            opt.className = "ra-net-opt" + (n === selectedNetwork ? " selected" : "");
+            opt.textContent = n;
+            opt.addEventListener("click", (e) => {
+              e.stopPropagation();
+              selectedNetwork = n;
+              closePortal();
+              rerender();
+            });
+            portal.appendChild(opt);
+          });
+
+          document.body.appendChild(portal);
+          trigger.classList.add("open");
+
+          /* scroll selected option into view */
+          const sel = portal.querySelector(".selected");
+          if (sel) sel.scrollIntoView({ block: "nearest" });
+
+          /* close when clicking outside */
+          setTimeout(() => document.addEventListener("click", outsideClick, true), 0);
+        }
+
+        trigger.addEventListener("click", (e) => {
+          e.stopPropagation();
+          const isOpen = !!document.getElementById("ra-net-portal");
+          isOpen ? closePortal() : openPortal();
         });
 
         /* address input — update state and validation UI in-place (no rerender,
