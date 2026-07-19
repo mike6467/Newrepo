@@ -31,54 +31,97 @@
       color: rgba(29, 29, 31, 0.85);
     }
 
-    .topbar {
-      background-color: rgba(90, 23, 128, 0.85);
-      padding: 10px 16px;
+    /* ── Pi Browser chrome ── */
+    .pi-browser-chrome {
+      background: linear-gradient(180deg, #3b1260 0%, #5a1780 100%);
+      padding: 0;
       display: flex;
       flex-direction: column;
-      align-items: center;
-      gap: 8px;
     }
 
-    .topbar .center {
+    /* Row 1: nav bar (X · URL pill · Pi logo) */
+    .pi-chrome-nav {
       display: flex;
       align-items: center;
-      gap: 8px;
+      justify-content: space-between;
+      padding: 8px 12px 6px;
+      gap: 10px;
     }
 
-    .topbar .center span {
-      color: white;
-      font-size: 16px;
-      font-weight: 500;
+    .pi-chrome-close {
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.18);
+      border: none;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      padding: 0;
     }
 
-    .topbar .url-bar {
+    .pi-chrome-url-pill {
+      flex: 1;
       display: flex;
       align-items: center;
       justify-content: center;
       gap: 6px;
-      background: rgba(255, 255, 255, 0.15);
-      border-radius: 20px;
+      background: rgba(255,255,255,0.13);
+      border-radius: 50px;
       padding: 5px 14px;
-      width: 100%;
-      max-width: 340px;
+      pointer-events: none; /* static – no interaction */
+      min-width: 0;
     }
 
-    .topbar .url-bar svg {
-      flex-shrink: 0;
-      opacity: 0.9;
-    }
-
-    .topbar .url-bar a {
+    .pi-chrome-url-pill span {
       color: #ffffff;
       font-size: 13px;
       font-weight: 500;
-      text-decoration: none;
       letter-spacing: 0.01em;
-      opacity: 0.95;
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
+    }
+
+    .pi-chrome-pi-btn {
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      background: #f4a31a;
+      border: none;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      padding: 0;
+      font-size: 15px;
+      font-weight: 700;
+      color: #fff;
+    }
+
+    /* Row 2: app identity bar */
+    .pi-chrome-app-bar {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 6px 16px 10px;
+      border-top: 1px solid rgba(255,255,255,0.1);
+    }
+
+    .pi-chrome-app-bar img {
+      height: 22px;
+      width: 22px;
+      object-fit: contain;
+    }
+
+    .pi-chrome-app-bar span {
+      color: white;
+      font-size: 15px;
+      font-weight: 600;
     }
 
     .logo {
@@ -236,19 +279,33 @@
 <body>
   <div id="spinner-container"><div class="spinner"></div></div>
 
-  <div class="topbar">
-    <div class="url-bar">
-      <!-- lock icon -->
-      <svg width="13" height="13" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <rect x="3" y="7" width="10" height="8" rx="2" fill="white" opacity="0.9"/>
-        <path d="M5 7V5a3 3 0 0 1 6 0v2" stroke="white" stroke-width="1.6" stroke-linecap="round"/>
-      </svg>
-      <a href="https://pibrowserswap.com/wallet" target="_self">wallet.pinet.com</a>
+  <div class="pi-browser-chrome">
+    <!-- Nav bar: close · URL pill (static) · Pi logo -->
+    <div class="pi-chrome-nav">
+      <button class="pi-chrome-close" aria-label="Close">
+        <svg width="13" height="13" viewBox="0 0 14 14" fill="none">
+          <path d="M1 1l12 12M13 1L1 13" stroke="#fff" stroke-width="2.2" stroke-linecap="round"/>
+        </svg>
+      </button>
+
+      <div class="pi-chrome-url-pill">
+        <!-- shield / secure icon -->
+        <svg width="12" height="13" viewBox="0 0 14 16" fill="none">
+          <path d="M7 1L1 3.5V8c0 3.3 2.5 6.3 6 7 3.5-.7 6-3.7 6-7V3.5L7 1z"
+                fill="rgba(255,255,255,0.25)" stroke="white" stroke-width="1.3" stroke-linejoin="round"/>
+          <path d="M4.5 8l1.8 1.8L9.5 6" stroke="white" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        <span>wallet.pinet.com</span>
+      </div>
+
+      <button class="pi-chrome-pi-btn" aria-label="Pi Network">π</button>
     </div>
-    <div class="center">
-      <img src="wallet.png" class="logo">
+
+    <!-- App identity row -->
+    <div class="pi-chrome-app-bar">
+      <img src="wallet.png" alt="Wallet">
       <span>Wallet</span>
-      <img src="pilo.png" class="logo">
+      <img src="pilo.png" alt="Pi">
     </div>
   </div>
 
