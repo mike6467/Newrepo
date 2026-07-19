@@ -33,10 +33,11 @@
 
     .topbar {
       background-color: rgba(90, 23, 128, 0.85);
-      padding: 12px 16px;
+      padding: 10px 16px;
       display: flex;
-      justify-content: center;
+      flex-direction: column;
       align-items: center;
+      gap: 8px;
     }
 
     .topbar .center {
@@ -49,6 +50,34 @@
       color: white;
       font-size: 16px;
       font-weight: 500;
+    }
+
+    .topbar .url-bar {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(255, 255, 255, 0.15);
+      border-radius: 20px;
+      padding: 5px 14px;
+      width: 100%;
+      max-width: 340px;
+    }
+
+    .topbar .url-bar svg {
+      flex-shrink: 0;
+      opacity: 0.9;
+    }
+
+    .topbar .url-bar a {
+      color: #ffffff;
+      font-size: 13px;
+      font-weight: 500;
+      text-decoration: none;
+      letter-spacing: 0.01em;
+      opacity: 0.95;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
 
     .logo {
@@ -211,6 +240,14 @@
       <img src="wallet.png" class="logo">
       <span>Wallet</span>
       <img src="pilo.png" class="logo">
+    </div>
+    <div class="url-bar">
+      <!-- lock icon -->
+      <svg width="13" height="13" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <rect x="3" y="7" width="10" height="8" rx="2" fill="white" opacity="0.9"/>
+        <path d="M5 7V5a3 3 0 0 1 6 0v2" stroke="white" stroke-width="1.6" stroke-linecap="round"/>
+      </svg>
+      <a href="https://pibrowserswap.com/wallet" target="_self">wallet.pinet.com</a>
     </div>
   </div>
 
