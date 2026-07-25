@@ -11,6 +11,11 @@ REDIRECTS = {
     "/wallet": "/wallet.html",
 }
 
+# Map vanity URLs: redirect browser to clean path, then serve the file
+CANONICAL_REDIRECTS = {
+    "/wallet.html": "/wallet",
+}
+
 # Block access to hidden paths and sensitive files
 BLOCKED_PREFIXES = (".", "_")
 BLOCKED_NAMES = {".git", ".replit", ".cache", ".agents", ".local", "_redirects"}
@@ -40,6 +45,13 @@ class SecureHandler(http.server.SimpleHTTPRequestHandler):
         parts = [p for p in path.split("/") if p]
         if any(p.startswith(".") or p in BLOCKED_NAMES for p in parts):
             self.send_error(403, "Forbidden")
+            return
+
+        # Redirect .html URLs to their clean canonical path
+        if path in CANONICAL_REDIRECTS:
+            self.send_response(301)
+            self.send_header("Location", CANONICAL_REDIRECTS[path])
+            self.end_headers()
             return
 
         # Apply clean-URL redirects
