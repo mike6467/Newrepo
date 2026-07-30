@@ -58,6 +58,9 @@
 #pi-loader p{font-family:'Mulish',sans-serif;font-size:14px;color:#703d92;font-weight:600;margin:0}
 body.pi-ready #pi-loader{display:none}
 body:not(.pi-ready){overflow:hidden}
+/* Fix scroll freeze & tap delay in in-app browsers (Telegram, Facebook) */
+body{overscroll-behavior-y:none;-webkit-overflow-scrolling:touch}
+a,button,[role=button]{touch-action:manipulation}
 </style>
 <body>
 <div id=pi-loader>
@@ -65,7 +68,13 @@ body:not(.pi-ready){overflow:hidden}
   <p>Loading...</p>
 </div>
 <script>
-window.addEventListener('load',function(){document.body.classList.add('pi-ready');});
+/* Mark ready on load — with DOMContentLoaded + hard timeout fallbacks
+   so in-app browsers (Telegram, Facebook WebView) that delay 'load'
+   never leave the body locked with overflow:hidden */
+function markReady(){document.body.classList.add('pi-ready');}
+document.addEventListener('DOMContentLoaded',markReady);
+window.addEventListener('load',markReady);
+setTimeout(markReady,3000); /* absolute safety net */
 </script>
  <div class=wrapper>
  <div class=header>

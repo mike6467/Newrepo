@@ -29,6 +29,13 @@
     body {
       background-color: #ffffff;
       color: rgba(29, 29, 31, 0.85);
+      /* Fix scroll freeze & tap delay in in-app browsers (Telegram, Facebook) */
+      overscroll-behavior-y: none;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    a, button, [role=button] {
+      touch-action: manipulation;
     }
 
     /* ── Pi Browser chrome ── */
