@@ -68,13 +68,51 @@ a,button,[role=button]{touch-action:manipulation}
   <p>Loading...</p>
 </div>
 <script>
-/* Mark ready on load — with DOMContentLoaded + hard timeout fallbacks
-   so in-app browsers (Telegram, Facebook WebView) that delay 'load'
-   never leave the body locked with overflow:hidden */
-function markReady(){document.body.classList.add('pi-ready');}
-document.addEventListener('DOMContentLoaded',markReady);
-window.addEventListener('load',markReady);
-setTimeout(markReady,3000); /* absolute safety net */
+/* Keep the first paint behind the loader until the page assets are ready.
+   DOMContentLoaded only means the HTML was parsed; it does not mean the
+   logos and card images have finished loading. */
+(function(){
+  var finished = false;
+  function markReady(){
+    if(finished) return;
+    finished = true;
+    document.body.classList.add('pi-ready');
+  }
+  function waitForImage(image){
+    return new Promise(function(resolve){
+      if(image.complete){
+        resolve();
+        return;
+      }
+      image.addEventListener('load',resolve,{once:true});
+      image.addEventListener('error',resolve,{once:true});
+    });
+  }
+  function waitForPageAssets(){
+    var images = Array.prototype.slice.call(document.images);
+    var imageLoads = images.map(waitForImage);
+    /* The large launchpad panel is a CSS background, so it is not included
+       in document.images and needs to be waited on explicitly. */
+    var background = new Image();
+    background.src = 'extracted_images/img_5_722fe0ef.png';
+    imageLoads.push(waitForImage(background));
+    var fonts = document.fonts && document.fonts.ready
+      ? document.fonts.ready.catch(function(){})
+      : Promise.resolve();
+    return Promise.all([Promise.all(imageLoads),fonts]);
+  }
+  function readyAfterPaint(){
+    requestAnimationFrame(function(){
+      requestAnimationFrame(markReady);
+    });
+  }
+  document.addEventListener('DOMContentLoaded',function(){
+    waitForPageAssets().then(readyAfterPaint);
+  },{once:true});
+  /* Do not leave visitors stuck forever if an external browser resource
+     never responds. Broken images resolve immediately via the error handler. */
+  setTimeout(markReady,10000);
+})();
 </script>
  <div class=wrapper>
  <div class=header>
